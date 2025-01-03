@@ -1,4 +1,7 @@
 *
+!*.dat
+!*.bmp
+!*.m
 !.gitignore
 !*.vhd
 !*.png
