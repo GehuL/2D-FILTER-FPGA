@@ -1,8 +1,8 @@
 *
 !.gitignore
-!.vhd
-!.png
-!.jpeg
-!.jpg
+!*.vhd
+!*.png
+!*.jpeg
+!*.jpg
 
 !*/
