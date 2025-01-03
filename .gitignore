@@ -1,0 +1,8 @@
+*
+!.gitignore
+!.vhd
+!.png
+!.jpeg
+!.jpg
+
+!*/
