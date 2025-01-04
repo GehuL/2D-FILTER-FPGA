@@ -47,7 +47,8 @@ component filtre3x3 Port(CLK: in STD_LOGIC;
                         KERNEL: in kernel_type;
                         PIXELS_IN: in pixels_type;
                         
-                        COEF_SUM: in STD_LOGIC_VECTOR(6 downto 0));
+                        COEF_SUM: in STD_LOGIC_VECTOR(6 downto 0);
+                        PIXEL_OUT: out STD_LOGIC_VECTOR(7 downto 0));
 end component;
 
 signal CLK: STD_LOGIC;
@@ -59,10 +60,10 @@ signal coef_sum: STD_LOGIC_VECTOR(6 downto 0);
 
 signal kernel: kernel_type;
 signal pixels: pixels_type;
-
+signal result: STD_LOGIC_VECTOR(7 downto 0);
 begin
 
-filtre: filtre3x3 port map(CLK => CLK, EN => EN, RESET => RESET, KERNEL => kernel, PIXELS_IN => pixels, COEF_SUM => coef_sum);
+filtre: filtre3x3 port map(CLK => CLK, EN => EN, RESET => RESET, KERNEL => kernel, PIXELS_IN => pixels, COEF_SUM => coef_sum, PIXEL_OUT => result);
 
 stimulus: process
 begin
@@ -71,7 +72,7 @@ begin
     RESET <= '1';
     
     for i in 0 to 8 loop
-     kernel(i) <= std_logic_vector(to_unsigned(i, 3));
+     kernel(i) <= std_logic_vector(to_unsigned(1, 3));
      pixels(i) <= std_logic_vector(to_unsigned(i, 8));
     end loop;
     

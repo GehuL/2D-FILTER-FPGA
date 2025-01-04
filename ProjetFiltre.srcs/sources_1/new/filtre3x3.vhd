@@ -66,7 +66,7 @@ signal pix2_1: STD_LOGIC_VECTOR(12 downto 0);
 signal pix2_2: STD_LOGIC_VECTOR(12 downto 0); 
 
 signal pix3_1: STD_LOGIC_VECTOR(13 downto 0);
-signal pix4_1: STD_LOGIC_VECTOR(13 downto 0);
+signal pix4_1: STD_LOGIC_VECTOR(14 downto 0);
 
 begin
 
@@ -103,10 +103,12 @@ begin
                 
                 pix3_1 <= ('0'&pix2_1) + ('0'&pix2_2);
                 
-                PIXEL_OUT <= std_logic_vector(to_unsigned(unsigned(pixel3_1) / unsigned(COEF_SUM), 8));
+                PIXEL_OUT <= pix3_1(13 downto 6); 
+                
+                -- https://surf-vhdl.com/how-to-divide-an-integer-by-constant-in-vhdl/
+               -- PIXEL_OUT <= std_logic_vector(to_unsigned(unsigned(pix3_1) / unsigned(COEF_SUM), 8));
         end if;
-    
-    
+
     end if;
 
 end process;
