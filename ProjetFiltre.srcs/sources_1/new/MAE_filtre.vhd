@@ -86,6 +86,7 @@ CONNEXION: process(CLK, RST)
 begin
     if(RST = '1') then
         compteur <= 0;
+        ETAT <= ETAT0;
     elsif(CLK'event and CLK = '1') then
     
         if(EN = '1') then
@@ -94,7 +95,6 @@ begin
                     if(compteur >= 15) then     -- Initialisation mémoire cache
                        ETAT <= ETAT1;
                        compteur <= 0;
-                       read_ready_sig <= '1';
                     else
                        compteur <= compteur + 1;
                     end if;
@@ -116,7 +116,10 @@ begin
                         compteur <= compteur + 1;
                     end if;
                     
+                 when ETAT3 =>
+                    
                     when others =>
+                        ETAT <= ETAT0;
             end case;
         end if;
     
@@ -133,6 +136,7 @@ begin
             read_ready_sig <= '0';
             data_av_sig <= '0';
         when ETAT1 => 
+            read_ready_sig <= '1';
             EN_mem <= '1';
         when ETAT2 =>
             EN_filtre <= '1';

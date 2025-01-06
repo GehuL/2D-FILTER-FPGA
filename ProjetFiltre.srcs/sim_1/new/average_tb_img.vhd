@@ -37,7 +37,7 @@ entity average_tb_img is
 --  Port ( );
 end average_tb_img;
 
-architecture cache_tb_img_arch of average_tb_img is
+architecture average_tb_img_arch of average_tb_img is
 
 component mem_cache Port(CLK: in STD_LOGIC;
                            EN: in STD_LOGIC;
@@ -184,4 +184,4 @@ p_write: process
  
 O1 <= PIXEL_OUT;
 
-end cache_tb_img_arch;
+end average_tb_img_arch;

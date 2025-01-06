@@ -33,11 +33,11 @@ use ieee.std_logic_textio.all;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity average_tb_img is
+entity mae_tb_img is
 --  Port ( );
-end average_tb_img;
+end mae_tb_img;
 
-architecture cache_tb_img_arch of average_tb_img is
+architecture mae_tb_img_arch of mae_tb_img is
 
 component mem_cache Port(CLK: in STD_LOGIC;
                            EN: in STD_LOGIC;
@@ -86,11 +86,6 @@ begin
 
 FILTRE: MAE_filtre port map(CLK => CLK, RST => RESET, EN => EN, data_av => data_av, read_ready => read_ready, pix_in => PIXEL_in, pix_out => PIXEL_OUT);
 
-stimulus: process
-begin
-    
-end process;
-
 clocking: process
 begin
  CLK <= '0'; 
@@ -117,7 +112,7 @@ p_read : process
     RESET <= '0';
     EN <= '1';
     
-    wait until read_ready = '1'; -- Attendre l'initialisation
+   wait until read_ready = '1'; -- Attendre l'initialisation
     
    while not endfile(vectors) loop
       readline (vectors,Iline);
@@ -126,6 +121,8 @@ p_read : process
       PIXEL_in <= I1_var;
 	  wait for clock_period;
     end loop;
+    
+   wait for (259+5)*clock_period;
     
     EN <= '0';
     RESET <= '1';
@@ -144,17 +141,20 @@ p_write: process
     file_open (results,"Lena128x128g_8bits_r.dat", write_mode);
     wait for clock_period/2;
     
-    wait until data_av = '1'; -- attend tant que data_available est à zéro
+    wait until data_av = '1'; -- attend tant que data_available passe à 1
 
     while data_av='1' loop
       write (Oline, O1, right, 2);
       writeline (results, Oline);
       wait for clock_period;  
     end loop;
+    
+    wait for clock_period*10;
+    
     file_close (results);
     wait;
  end process;
  
 O1 <= PIXEL_OUT;
 
-end cache_tb_img_arch;
+end mae_tb_img_arch;
