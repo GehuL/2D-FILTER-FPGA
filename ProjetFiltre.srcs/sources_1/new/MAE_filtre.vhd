@@ -7,7 +7,7 @@ entity MAE_filtre is Port( CLK: in STD_LOGIC;
                            
                            data_in_av: in STD_LOGIC; -- Indique que des données arrivent
                            
-                           data_av: out STD_LOGIC;
+                           data_av: out STD_LOGIC;   -- Indique qu'il y a des données en sorties du filtre
                            read_ready: out STD_LOGIC;
                            
                            pix_in: in STD_LOGIC_VECTOR(7 downto 0);
@@ -104,37 +104,32 @@ begin
                 
                     if(data_in_av = '1') 
                     then                
-                        if(compteur >= 128*2+3) then -- Attend le remplissage du buffer
+                        if(compteur >= 128*2+7) then -- Attend le remplissage du buffer + délai filtre (3 FF + 4 filtre = 7)
                            ETAT <= ETAT2;
                            compteur <= 0;
                         else
                            compteur <= compteur + 1;
                         end if;
-                    else -- Standby de la mémoire 
+                    else -- Stand-by de la mémoire 
                         compteur <= compteur; 
                     end if;
                
                 when ETAT2 =>
                 
-                    if(compteur >= 4) then -- Compte 4 cycles pour le délai du filtre
-                        ETAT <= ETAT3;
-                        compteur <= 0;
-                    else
-                        compteur <= compteur + 1;
-                    end if;
-                    
-                 when ETAT3 =>
-                    
                     if(data_in_av = '0') -- Si il n'y a plus de donnée en entrée, on attend que la mémoire se vide
                     then
-                        
-                         if(compteur >= 128*2+8) then
+                         if(compteur >= 128*2+7) then
                              ETAT <= ETAT1;
                              compteur <= 0;
                          else
                              compteur <= compteur + 1;
                          end if;
-
+                    else
+                        if(compteur > 0) then -- La mémoire se re-rempli.
+                             compteur <= compteur - 1;
+                         else
+                             compteur <= 0;
+                         end if;
                     end if;
                     
                     when others =>
@@ -160,19 +155,18 @@ begin
             EN_filtre <= data_in_av;
             read_ready_sig <= '1';
             data_av_sig <= '0';
-        when ETAT2 =>
-            RST_filtre <= '0';
-            EN_mem <= data_in_av;
-            EN_filtre <= data_in_av;
-            read_ready_sig <= '1';
-            data_av_sig <= '0';
-        when ETAT3 => -- Indique que des données en sorties sont disponibles
+        when ETAT2 => -- Indique que des données en sorties sont disponibles
             RST_filtre <= '0';
             EN_mem <= data_in_av;
             EN_filtre <= data_in_av;
             read_ready_sig <= '1';
             data_av_sig <= '1';
-        when others => 
+        when others =>
+            RST_filtre <= '0';
+            EN_mem <= '0';
+            EN_filtre <= '0';
+            read_ready_sig <= '0';
+            data_av_sig <= '0';
     end case;
 end process;
 

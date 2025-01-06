@@ -108,13 +108,16 @@ p_read : process
     EN <= '0';              
     RESET <= '1';
     data_in_av <= '0';
+    
     wait for clock_period*2;
+    
     RESET <= '0';
     EN <= '1';
-    data_in_av <= '1';
     
    wait until read_ready = '1'; -- Attendre l'initialisation
     
+   data_in_av <= '1';
+
    while not endfile(vectors) loop
       readline (vectors,Iline);
       read (Iline,I1_var);
@@ -124,7 +127,6 @@ p_read : process
     end loop;
     
     data_in_av <= '0'; -- Informe qu'il n'y a plus de données,
-   -- wait for (259+5)*clock_period;
     wait until data_av = '0'; -- Attend que toutes les données soient traitées
     EN <= '0';
     RESET <= '1';
@@ -150,8 +152,6 @@ p_write: process
       writeline (results, Oline);
       wait for clock_period;  
     end loop;
-    
-    -- wait for clock_period*10;
     
     file_close (results);
     wait;
