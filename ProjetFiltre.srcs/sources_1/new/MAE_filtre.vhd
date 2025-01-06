@@ -5,6 +5,8 @@ entity MAE_filtre is Port( CLK: in STD_LOGIC;
                            RST: in STD_LOGIC;
                            EN: in STD_LOGIC;
                            
+                           data_in_av: in STD_LOGIC; -- Indique que des données arrivent
+                           
                            data_av: out STD_LOGIC;
                            read_ready: out STD_LOGIC;
                            
@@ -100,11 +102,16 @@ begin
                     end if;
                 when ETAT1 => 
                 
-                    if(compteur >= 128*2+3) then -- Attend le remplissage du buffer
-                       ETAT <= ETAT2;
-                       compteur <= 0;
-                    else
-                       compteur <= compteur + 1;
+                    if(data_in_av = '1') 
+                    then                
+                        if(compteur >= 128*2+3) then -- Attend le remplissage du buffer
+                           ETAT <= ETAT2;
+                           compteur <= 0;
+                        else
+                           compteur <= compteur + 1;
+                        end if;
+                    else -- Standby de la mémoire 
+                        compteur <= compteur; 
                     end if;
                
                 when ETAT2 =>
@@ -118,6 +125,18 @@ begin
                     
                  when ETAT3 =>
                     
+                    if(data_in_av = '0') -- Si il n'y a plus de donnée en entrée, on attend que la mémoire se vide
+                    then
+                        
+                         if(compteur >= 128*2+8) then
+                             ETAT <= ETAT1;
+                             compteur <= 0;
+                         else
+                             compteur <= compteur + 1;
+                         end if;
+
+                    end if;
+                    
                     when others =>
                         ETAT <= ETAT0;
             end case;
@@ -126,7 +145,7 @@ begin
     end if;
 end process;
 
-ACTION: process(ETAT)
+ACTION: process(ETAT, data_in_av)
 begin
     case(ETAT) is
         when ETAT0 => 
@@ -135,12 +154,23 @@ begin
             EN_filtre <= '0';
             read_ready_sig <= '0';
             data_av_sig <= '0';
-        when ETAT1 => 
+        when ETAT1 =>
+            RST_filtre <= '0';
+            EN_mem <= data_in_av;
+            EN_filtre <= data_in_av;
             read_ready_sig <= '1';
-            EN_mem <= '1';
+            data_av_sig <= '0';
         when ETAT2 =>
-            EN_filtre <= '1';
-        when ETAT3 =>
+            RST_filtre <= '0';
+            EN_mem <= data_in_av;
+            EN_filtre <= data_in_av;
+            read_ready_sig <= '1';
+            data_av_sig <= '0';
+        when ETAT3 => -- Indique que des données en sorties sont disponibles
+            RST_filtre <= '0';
+            EN_mem <= data_in_av;
+            EN_filtre <= data_in_av;
+            read_ready_sig <= '1';
             data_av_sig <= '1';
         when others => 
     end case;

@@ -59,7 +59,7 @@ end component;
 component MAE_filtre Port( CLK: in STD_LOGIC;
                            RST: in STD_LOGIC;
                            EN: in STD_LOGIC;
-                           
+                           data_in_av: in STD_LOGIC; 
                            data_av: out STD_LOGIC;
                            read_ready: out STD_LOGIC;
                            
@@ -80,11 +80,11 @@ signal O1 : std_logic_vector (7 downto 0);
 
 signal PIXEL_OUT : STD_LOGIC_VECTOR(7 downto 0);
 
-signal data_av, read_ready: STD_LOGIC;
+signal data_in_av, data_av, read_ready: STD_LOGIC;
 
 begin
 
-FILTRE: MAE_filtre port map(CLK => CLK, RST => RESET, EN => EN, data_av => data_av, read_ready => read_ready, pix_in => PIXEL_in, pix_out => PIXEL_OUT);
+FILTRE: MAE_filtre port map(CLK => CLK, RST => RESET, EN => EN, data_in_av=> data_in_av, data_av => data_av, read_ready => read_ready, pix_in => PIXEL_in, pix_out => PIXEL_OUT);
 
 clocking: process
 begin
@@ -107,10 +107,11 @@ p_read : process
     PIXEL_in <= (others => '0');
     EN <= '0';              
     RESET <= '1';
-    
+    data_in_av <= '0';
     wait for clock_period*2;
     RESET <= '0';
     EN <= '1';
+    data_in_av <= '1';
     
    wait until read_ready = '1'; -- Attendre l'initialisation
     
@@ -122,8 +123,9 @@ p_read : process
 	  wait for clock_period;
     end loop;
     
-   wait for (259+5)*clock_period;
-    
+    data_in_av <= '0'; -- Informe qu'il n'y a plus de données,
+   -- wait for (259+5)*clock_period;
+    wait until data_av = '0'; -- Attend que toutes les données soient traitées
     EN <= '0';
     RESET <= '1';
     
@@ -149,7 +151,7 @@ p_write: process
       wait for clock_period;  
     end loop;
     
-    wait for clock_period*10;
+    -- wait for clock_period*10;
     
     file_close (results);
     wait;
